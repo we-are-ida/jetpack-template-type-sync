@@ -18,6 +18,8 @@ import org.apache.sling.api.servlets.HtmlResponse;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 
+import javax.jcr.Node;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -89,7 +91,13 @@ public class SyncTemplateTypesWcmCommand implements WCMCommand {
                 try {
                     String copyLocation = templatePolicyPath.substring(0, templatePolicyPath.lastIndexOf("/"));
                     resourceResolver.copy(resource.getPath(), copyLocation);
-                } catch (PersistenceException pex) {
+
+                    Resource policyConfig = resourceResolver.getResource(template.getPath() + "/policies/jcr:content");
+                    if (policyConfig != null) {
+                        Node policyConfigNode = policyConfig.adaptTo(Node.class);
+                        policyConfigNode.setProperty("cq:lastModified", Calendar.getInstance());
+                    }
+                } catch (Exception pex) {
                     //TODO
                 }
             } else {
