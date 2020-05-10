@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:SystemUser"
+          jcr:uuid="2e015298-930f-34de-aa8f-b0177806a63d"
+          rep:authorizableId="jetpack-template-type-sync"
+          rep:principalName="jetpack-template-type-sync"/>

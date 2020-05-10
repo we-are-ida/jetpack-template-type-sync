@@ -14,6 +14,6 @@
  *  limitations under the License.
  */
 @Version("1.0")
-package be.ida_mediafoundry.jetpack.templatetypesync;
+package be.idamediafoundry.jetpack.templatetypesync;
 
 import org.osgi.annotation.versioning.Version;

@@ -2,4 +2,8 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/jetpack/template-type-sync"/>
     <filter root="/apps/granite/configurations/content" mode="update"/>
+
+    <!--filter root="/home/users/system/jetpack-template-type-sync"/-->
+
+    <filter root="/conf/rep:policy" mode="merge"/>
 </workspaceFilter>

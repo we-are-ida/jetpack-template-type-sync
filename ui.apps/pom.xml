@@ -83,6 +83,9 @@
                     <failOnError>true</failOnError>
                     <name>Jetpack-Template-Type-Sync</name>
                     <group>Jetpack</group>
+                    <properties>
+                        <acHandling>merge_preserve</acHandling>
+                    </properties>
                     <embeddeds>
                         <embedded>
                             <groupId>be.ida_mediafoundry.jetpack</groupId>

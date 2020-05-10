@@ -3,4 +3,4 @@
           xmlns:jcr="http://www.jcp.org/jcr/1.0"
           jcr:primaryType="sling:OsgiConfig"
           user.default="jetpack-template-type-sync"
-          user.mapping="[be.ida_mediafoundry.jetpack.templatetypesync.core=jetpack-template-type-sync]"/>
+          user.mapping="[be.idamediafoundry.jetpack.templatetypesync.core=jetpack-template-type-sync]"/>

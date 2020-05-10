@@ -1,76 +1,74 @@
-package be.ida_mediafoundry.jetpack.templatetypesync.servlets;
+package be.idamediafoundry.jetpack.templatetypesync.service.impl;
 
+import be.idamediafoundry.jetpack.templatetypesync.service.SyncTemplateService;
 import com.day.cq.commons.servlets.HtmlStatusResponseHelper;
-import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.Template;
 import com.day.cq.wcm.api.TemplateManager;
-import com.day.cq.wcm.api.commands.WCMCommand;
-import com.day.cq.wcm.api.commands.WCMCommandContext;
 import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.*;
 import org.apache.sling.api.servlets.HtmlResponse;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Sync Template Types
- * Will Sync the Policies for the template-types to the Templates for the /conf folder provided in the "path" request parameter.
+ * @author michael
+ * @since 09/05/2020
  */
-@Component(service = WCMCommand.class,
-        property = {
-                Constants.SERVICE_DESCRIPTION + "=Jetpack - Sync Template-Types"
+@Component(service = SyncTemplateService.class,
+        name = "Jetpack Sync Templates Service"
+)
+public class SyncTemplateServiceImpl implements SyncTemplateService {
 
-        })
-public class SyncTemplateTypesWcmCommand implements WCMCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(SyncTemplateServiceImpl.class);
+
+    private static final String DEFAULT_USER = "jetpack-template-type-sync";
+    private static final String DEFAULT_SERVICE = "be.idamediafoundry.jetpack.templatetypesync.core";
+
+    @Reference
+    private ResourceResolverFactory resourceResolverFactory;
 
     @Override
-    public String getCommandName() {
-        return "syncTemplateTypes";
-    }
-
-    @Override
-    public HtmlResponse performCommand(WCMCommandContext wcmCommandContext,
-                                       SlingHttpServletRequest slingHttpServletRequest,
-                                       SlingHttpServletResponse slingHttpServletResponse,
-                                       PageManager pageManager) {
-
-        Resource resource = slingHttpServletRequest.getResource();
-
-        RequestParameter path = slingHttpServletRequest.getRequestParameter(PATH_PARAM);
-        String confPath = path.getString();
-
-        if (StringUtils.isBlank(confPath)) {
-            return HtmlStatusResponseHelper.createStatusResponse(false, "No Path provided");
+    public boolean syncTemplates(String confPath) {
+        try (ResourceResolver resourceResolver = resourceResolverFactory.getServiceResourceResolver(getCredentials())) {
+            Resource resource = resourceResolver.getResource(confPath);
+            //TODO
+            return true;
+        } catch (LoginException e) {
+            LOG.error("Couldn't login to get the Configuration", e);
+            return false;
         }
-
-        return doProcess(resource, path, confPath);
     }
 
-    private HtmlResponse doProcess(Resource resource, RequestParameter path, String confPath) {
-        TemplateManager templateManager = resource.getResourceResolver().adaptTo(TemplateManager.class);
-        ResourceResolver resourceResolver = resource.getResourceResolver();
+    @Override
+    public boolean syncTemplates(Resource confResource) {
 
+        //TODO: throw exception if wrong
+
+        TemplateManager templateManager = confResource.getResourceResolver().adaptTo(TemplateManager.class);
+        ResourceResolver resourceResolver = confResource.getResourceResolver();
+
+        //TODO confResource exists?
+        String confPath = confResource.getPath();
 
         try {
-            List<Template> templateTypes = templateManager.getTemplateTypes(confPath);
-            templateTypes.forEach(templateType -> processTemplate(templateType, templateManager, path.getString(), resourceResolver));
+            List<Template> templateTypes = templateManager.getTemplateTypes(confResource.getPath());
+            templateTypes.forEach(templateType -> processTemplate(templateType, templateManager, confPath, resourceResolver));
 
             resourceResolver.commit();
 
-            return HtmlStatusResponseHelper.createStatusResponse(true, "Synced", confPath);
+            return true;
         } catch (PersistenceException ex) {
             //TODO log
-            return HtmlStatusResponseHelper.createStatusResponse(false, "Not saved", confPath);
+            return false;
         }
     }
 
@@ -125,5 +123,12 @@ public class SyncTemplateTypesWcmCommand implements WCMCommand {
             }
             return false;
         }
+    }
+
+    private Map<String, Object> getCredentials() {
+        Map<String, Object> credentials = new HashMap<>();
+        credentials.put(ResourceResolverFactory.USER, DEFAULT_USER);
+        credentials.put(ResourceResolverFactory.SUBSERVICE, DEFAULT_SERVICE);
+        return credentials;
     }
 }
